@@ -819,15 +819,16 @@ generate the stubs that sit between the underlying RPC mechanism and
 the actual functions being called (see [Figure 2](#rpc-stub)). This is
 a topic we'll take up in Chapter 7.
 
-The bottom line is that complex mechanisms like RPC, once packaged as
-a monolthic bundle of software (as with SunRPC and DCE-RPC), is nowdays
-built by assembling an assortment of smaller pieces, each of
-which solves a narrow problem. gRPC is both an example of that
-approach, and a tool that enables further adoption of the approach. 
-The micro-services architecture mentioned earlier in this subsection
-applies the "built from small parts" strategy to entire cloud
-applications (e.g., Uber, Lyft, Netflix, Yelp, Spotify), where gRPC is often
-the communication mechanism used by those small pieces to exchange
-messages with each other.
+> [!Note|style:flat|label:Key Takeaway|iconVisibility:hidden]
+> The bottom line is that complex mechanisms like RPC, once packaged
+> as a monolthic bundle of software (as with SunRPC and DCE-RPC), is
+> nowdays built by assembling an assortment of smaller pieces, each of
+> which solves a narrow problem. gRPC is both an example of that
+> approach, and a tool that enables further adoption of the approach. 
+> The micro-services architecture mentioned earlier in this subsection
+> applies the "built from small parts" strategy to entire cloud
+> applications (e.g., Uber, Lyft, Netflix, Yelp, Spotify), where gRPC
+> is often the communication mechanism used by those small pieces to
+> exchange messages with each other.
 
 
