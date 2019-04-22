@@ -326,6 +326,8 @@ machine, but returns before the sender's peer on that machine has
 actually processed and responded to it. This is sometimes called a
 *reliable datagram protocol*.
 
+{% include "../sidebars/layer-rpc.md" %}
+
 ## RPC Implementations (SunRPC, DCE, gRPC)
 
 We now turn our discussion to some example implementations of RPC
