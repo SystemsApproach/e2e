@@ -157,7 +157,9 @@ vulnerability, it is still necessary to provide true end-to-end checks
 to guarantee reliable/ordered service, even though the lower levels of
 the system also implement that functionality.
 
-> [!Note|style:flat|label:Key Takeaway|iconVisibility:hidden]
+<!--- [!Note|style:flat|label:Key Takeaway|iconVisibility:hidden] --->
+> **Key Takeaway**
+>
 > This discussion serves to illustrate one of the most important
 > principles in system design—the *end-to-end argument*. In a nutshell,
 > the end-to-end argument says that a function (in our example, providing
@@ -683,7 +685,9 @@ probably not be accepted, but it tries anyway, because each of these
 window. Eventually, one of these 1-byte probes triggers a response that
 reports a nonzero advertised window.
 
-> [!Note|style:flat|label:Key Takeaway|iconVisibility:hidden]
+<!--- [!Note|style:flat|label:Key Takeaway|iconVisibility:hidden] --->
+> **Key Takeaway**
+>
 > Note that the reason the sending side periodically sends this probe
 > segment is that TCP is designed to make the receive side as simple as
 > possible—it simply responds to segments from the sender, and it never

@@ -819,7 +819,9 @@ generate the stubs that sit between the underlying RPC mechanism and
 the actual functions being called (see [Figure 2](#rpc-stub)). This is
 a topic we'll take up in Chapter 7.
 
-> [!Note|style:flat|label:Key Takeaway|iconVisibility:hidden]
+<!--- [!Note|style:flat|label:Key Takeaway|iconVisibility:hidden] --->
+> **Key Takeaway**
+>
 > The bottom line is that complex mechanisms like RPC, once packaged
 > as a monolthic bundle of software (as with SunRPC and DCE-RPC), is
 > nowdays built by assembling an assortment of smaller pieces, each of

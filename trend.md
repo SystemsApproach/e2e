@@ -80,7 +80,9 @@ the way across the Internet to retrieve some piece of information.
 used to deliver real-time multimedia, in an approach known as
 *adaptive streaming*. (See how in [Section 7.2](../data/multimedia.md).)
 
-> [!NOTE|label:Broader Perspective]
+<!--- > [!NOTE|label:Broader Perspective] --->
+> **Broader Perspective**
+>
 > To continue reading about the cloudification of the Internet, see
 > [Software Defined Traffic Engineering](../congestion/trend.md).
 >
