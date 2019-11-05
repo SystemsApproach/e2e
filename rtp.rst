@@ -1,41 +1,31 @@
-# {{ page.title }}
+5.4 Transport for Real-Time (RTP)
+=================================
 
-In the early days of packet switching, most applications were concerned
-with the movement of data: accessing remote computing resources,
-transferring files, sending email, etc. However, at least as early as
-1981, experiments were under way to carry real-time traffic, such as
-digitized voice samples, over packet networks. We call an application
-"real-time" when it has strong requirements for the timely delivery of
-information. Voice over IP (VoIP) is a classic
-example of a real-time application because you can't easily carry on a
-conversation with someone if it takes more than a fraction of a second
-to get a response. As we will see shortly, real-time applications place
-some specific demands on the transport protocol that are not well met
-by the protocols discussed so far in this chapter.
+In the early days of packet switching, most applications were
+concerned with transfering files, although as early as 1981,
+experiments were under way to carry real-time traffic, such as
+digitized voice samples. We call an application “real-time” when it
+has strong requirements for the timely delivery of information. Voice
+over IP (VoIP) is a classic example of a real-time application because
+you can’t easily carry on a conversation with someone if it takes more
+than a fraction of a second to get a response.  As we will see
+shortly, real-time applications place some specific demands on the
+transport protocol that are not well met by the protocols discussed so
+far in this chapter.
 
-<figure class="line">
-	<a id="vat"></a>
-	<img src="figures/f05-21-9780123850591.png" width="400px"/>
-	<figcaption>User interface of vat, an early Internet
-	audioconferencing tool.</figcaption>
-</figure>
+.. _fig-zoom:
+.. figure:: figures/Zoom.png
+   :width: 500px
+   :align: center
 
-Multimedia applications—those that involve video, audio, and
-data—are sometimes divided into two classes: *interactive*
-applications and *streaming* applications. An early and at one time
-popular example of the interactive class was `vat`, a multiparty
-audioconferencing tool that is often used over networks supporting IP
-multicast. The control panel for a typical `vat` conference is shown
-in [Figure 1](#vat). VoIP is also a class of interactive application
-and probably the most widely used today. Internet-based multimedia
-conferencing applications, like the commercial products WebEx and
-GoToMeeting are another example. These are the sort of applications
+   User interface of a videoconferencing tool.
+
+Multimedia applications—those that involve video, audio, and data—are
+sometimes divided into two classes: *interactive* applications and
+*streaming* applications. :numref:`Figure %s <fig-zoom>` shows the
+authors using an example conferencing tool that's typical of the
+interactive class. Along with VoIP, these are the sort of applications
 with the most stringent real-time requirements.
-
-> Even though it's been overtaken by a plethora of commercial
-> products, we use `vat` as a running example in this section
-> because it was the application that introduced interactive real-time
-> functionality into the Internet in the first place.
 
 Streaming applications typically deliver audio or video streams from a
 server to a client and are typified by such commercial products as
@@ -44,7 +34,7 @@ one of the dominant forms of traffic on the Internet. Because streaming
 applications lack human-to-human interaction, they place somewhat less
 stringent real-time requirements on the underlying protocols. Timeliness
 is still important, however—for example, you want a video to start
-playing soon after pushing "play," and once it starts to play, late
+playing soon after pushing “play,” and once it starts to play, late
 packets will either cause it to stall or create some sort of visual
 degradation. So, while streaming applications are not strictly real
 time, they still have enough in common with interactive multimedia
@@ -60,31 +50,38 @@ streams. We will see below how these concerns affected the design of the
 primary real-time transport protocol in use today, RTP.
 
 Much of RTP actually derives from protocol functionality that was
-originally embedded in the application itself. When the `vat`
-application was first developed, it ran over UDP, and the designers
-figured out which features were needed to handle the real-time nature of
-voice communication. Later, they realized that these features could be
+originally embedded in the application itself. Two of the first such
+applications were ``vic`` and ``vat``, the former supporting real-time
+video and the latter supporting real-time audio. Both applications
+originally ran directly over UDP, while the designers figured out
+which features were needed to handle the real-time nature of the
+communication. Later, they realized that these features could be
 useful to many other applications and defined a protocol with those
-features, which became RTP. RTP can run over many lower-layer protocols,
-but still commonly runs over UDP. That leads to the protocol stack shown
-in [Figure 2](#vat-stack). Note that we are therefore running a
-transport protocol over a transport protocol. There is no rule against
-that, and in fact it makes a lot of sense, since UDP provides such a
-minimal level of functionality, and the basic demultiplexing based on
-port numbers happens to be just what RTP needs as a starting point. So,
+features. That protocol was eventually standardized as the *Real-time
+Transport Protocol* (RTP).
+
+RTP can run over many lower-layer protocols, but still commonly runs
+over UDP. That leads to the protocol stack shown in :numref:`Figure %s
+<fig-vat-stack>`. Note that we are therefore running a transport
+protocol over a transport protocol. There is no rule against that, and
+in fact it makes a lot of sense, since UDP provides such a minimal
+level of functionality, and the basic demultiplexing based on port
+numbers happens to be just what RTP needs as a starting point. So,
 rather than recreate port numbers in RTP, RTP outsources the
 demultiplexing function to UDP.
 
-<figure class="line">
-	<a id="vat-stack"></a>
-	<img src="figures/f05-22-9780123850591.png" width="300px"/>
-	<figcaption>Protocol stack for multimedia applications using RTP.</figcaption>
-</figure>
+.. _fig-vat-stack:
+.. figure:: figures/f05-22-9780123850591.png
+   :width: 300px
+   :align: center
 
-## Requirements
+   Protocol stack for multimedia applications using RTP.
+
+Requirements
+------------
 
 The most basic requirement for a general-purpose multimedia protocol is
-that it allow similar applications to interoperate with each other. For
+that it allows similar applications to interoperate with each other. For
 example, it should be possible for two independently implemented
 audioconferencing applications to talk to each other. This immediately
 suggests that the applications had better use the same method of
@@ -138,28 +135,29 @@ consumed. Clearly, to make this work, the receiver needs to notify the
 sender that losses are occurring so that the sender can adjust its
 coding parameters.
 
-Another common function across multimedia applications is the concept of
-frame boundary indication. A frame in this context is application
+Another common function across multimedia applications is the concept
+of frame boundary indication. A frame in this context is application
 specific. For example, it may be helpful to notify a video application
-that a certain set of packets correspond to a single frame. In an audio
-application it is helpful to mark the beginning of a "talkspurt," which
-is a collection of sounds or words followed by silence. The receiver can
-then identify the silences between talkspurts and use them as
-opportunities to move the playback point. This follows the observation
-that slight shortening or lengthening of the spaces between words are
-not perceptible to users, whereas shortening or lengthening the words
-themselves is both perceptible and annoying.
+that a certain set of packets correspond to a single frame. In an
+audio application it is helpful to mark the beginning of a
+“talkspurt,” which is a collection of sounds or words followed by
+silence. The receiver can then identify the silences between
+talkspurts and use them as opportunities to move the playback
+point. This follows the observation that slight shortening or
+lengthening of the spaces between words are not perceptible to users,
+whereas shortening or lengthening the words themselves is both
+perceptible and annoying.
 
-A final function that we might want to put into the protocol is some way
-of identifying senders that is more user-friendly than an IP address. As
-illustrated in [Figure 1](#vat), audio and video conferencing
-applications can display strings such as on their control panels, and
-thus the application protocol should support the association of such a
-string with a data stream.
+A final function that we might want to put into the protocol is some
+way of identifying senders that is more user-friendly than an IP
+address. As illustrated in :numref:`Figure %s <fig-zoom>`, audio and
+video conferencing applications can display strings such as on their
+control panels, and thus the application protocol should support the
+association of such a string with a data stream.
 
 In addition to the functionality that is required from our protocol, we
 note an additional requirement: It should make reasonably efficient use
-of bandwidth. Put another way, we don't want to introduce a lot of extra
+of bandwidth. Put another way, we don’t want to introduce a lot of extra
 bits that need to be sent with every packet in the form of a long
 header. The reason for this is that audio packets, which are one of the
 most common types of multimedia data, tend to be small, so as to reduce
@@ -169,7 +167,7 @@ the perceived quality of conversations. (This was one of the factors in
 choosing the length of ATM cells.) Since the data packets themselves are
 short, a large header would mean that a relatively large amount of link
 bandwidth would be used by headers, thus reducing the available capacity
-for "useful" data. We will see several aspects of the design of RTP that
+for “useful” data. We will see several aspects of the design of RTP that
 have been influenced by the necessity of keeping the header short.
 
 You could argue whether every single feature just described *really*
@@ -181,7 +179,8 @@ putting a timestamping mechanism into RTP, we save every developer of a
 real-time application from inventing his own. We also increase the
 chances that two different real-time applications might interoperate.
 
-## RTP Design
+RTP Design
+----------
 
 Now that we have seen the rather long list of requirements for our
 transport protocol for multimedia, we turn to the details of the
@@ -210,44 +209,45 @@ Alternatively, the format of the data might be much more complex; an
 MPEG-encoded video stream, for example, would need to have a good deal
 of structure to represent all the different types of information.
 
-<!--- [!Note|style:flat|label:Key Takeaway|iconVisibility:hidden] --->
-> **Key Takeaway**
->
-> The design of RTP embodies an architectural principle known as
-> *Application Level Framing* (ALF). This principle was put forward by
-> Clark and Tennenhouse in 1990 as a new way to design protocols for
-> emerging multimedia applications. They recognized that these new
-> applications were unlikely to be well served by existing protocols such
-> as TCP, and that furthermore they might not be well served by any sort
-> of "one-size-fits-all" protocol. At the heart of this principle is the
-> belief that an application understands its own needs best. For example,
-> an MPEG video application knows how best to recover from lost frames and
-> how to react differently if an I frame or a B frame is lost. The same
-> application also understands best how to segment the data for
-> transmission—for example, it's better to send the data from different
-> frames in different datagrams, so that a lost packet only corrupts a
-> single frame, not two. It is for this reason that RTP leaves so many of
-> the protocol details to the profile and format documents that are
-> specific to an application.
+.. admonition::  Key Takeaway*
 
-### Header Format
+   The design of RTP embodies an architectural principle known as
+   *Application Level Framing* (ALF). This principle was put forward by
+   Clark and Tennenhouse in 1990 as a new way to design protocols for
+   emerging multimedia applications. They recognized that these new
+   applications were unlikely to be well served by existing protocols
+   such as TCP, and that furthermore they might not be well served by
+   any sort of “one-size-fits-all” protocol. At the heart of this
+   principle is the belief that an application understands its own needs
+   best. For example, an MPEG video application knows how best to
+   recover from lost frames and how to react differently if an I frame
+   or a B frame is lost. The same application also understands best how
+   to segment the data for transmission—for example, it’s better to send
+   the data from different frames in different datagrams, so that a lost
+   packet only corrupts a single frame, not two. It is for this reason
+   that RTP leaves so many of the protocol details to the profile and
+   format documents that are specific to an application.
 
-[Figure 3](#rtp-hdr) shows the header format used by RTP. The first
-12 bytes are always present, whereas the contributing source
-identifiers are only used in certain circumstances. After this header
-there may be optional header extensions, as described below. Finally,
-the header is followed by the RTP payload, the format of which is
-determined by the application. The intention of this header is that it
-contain only the fields that are likely to be used by many different
-applications, since anything that is very specific to a single
-application would be more efficiently carried in the RTP payload for
-that application only.
+Header Format
+~~~~~~~~~~~~~
 
-<figure class="line">
-	<a id="rtp-hdr"></a>
-	<img src="figures/f05-23-9780123850591.png" width="500px"/>
-	<figcaption>RTP header format.</figcaption>
-</figure>
+:numref:`Figure %s <fig-rtp-hdr>` shows the header format used by
+RTP. The first 12 bytes are always present, whereas the contributing
+source identifiers are only used in certain circumstances. After this
+header there may be optional header extensions, as described
+below. Finally, the header is followed by the RTP payload, the format
+of which is determined by the application. The intention of this
+header is that it contain only the fields that are likely to be used
+by many different applications, since anything that is very specific
+to a single application would be more efficiently carried in the RTP
+payload for that application only.
+
+.. _fig-rtp-hdr:
+.. figure:: figures/f05-23-9780123850591.png
+   :width: 500px
+   :align: center
+
+   RTP header format.
 
 The first two bits are a version identifier, which contains the value 2
 in the RTP version deployed at the time of writing. You might think that
@@ -259,34 +259,36 @@ revisions to the base RTP protocol would be needed. In any case, if it
 turns out that another version of RTP is needed beyond version 2, it
 would be possible to consider a change to the header format so that more
 than one future version would be possible. For example, a new RTP header
-with the value 3 in the version field could have a "subversion" field
+with the value 3 in the version field could have a “subversion” field
 somewhere else in the header.
 
-The next bit is the *padding* (`P`) bit, which is set in circumstances
-in which the RTP payload has been padded for some reason. RTP data might
-be padded to fill up a block of a certain size as required by an
-encryption algorithm, for example. In such a case, the complete length
-of the RTP header, data, and padding would be conveyed by the
-lower-layer protocol header (e.g., the UDP header), and the last byte of
-the padding would contain a count of how many bytes should be ignored.
-This is illustrated in [Figure 4](#rtp-pad). Note that this approach to
-padding removes any need for a length field in the RTP header (thus
-serving the goal of keeping the header short); in the common case of no
-padding, the length is deduced from the lower-layer protocol.
+The next bit is the *padding* (``P``) bit, which is set in
+circumstances in which the RTP payload has been padded for some
+reason. RTP data might be padded to fill up a block of a certain size
+as required by an encryption algorithm, for example. In such a case,
+the complete length of the RTP header, data, and padding would be
+conveyed by the lower-layer protocol header (e.g., the UDP header),
+and the last byte of the padding would contain a count of how many
+bytes should be ignored.  This is illustrated in :numref:`Figure %s
+<fig-rtp-pad>`. Note that this approach to padding removes any need
+for a length field in the RTP header (thus serving the goal of keeping
+the header short); in the common case of no padding, the length is
+deduced from the lower-layer protocol.
 
-<figure class="line">
-	<a id="rtp-pad"></a>
-	<img src="figures/f05-24-9780123850591.png" width="600px"/>
-	<figcaption>Padding of an RTP packet.</figcaption>
-</figure>
+.. _fig-rtp-pad:
+.. figure:: figures/f05-24-9780123850591.png
+   :width: 600px
+   :align: center
 
-The *extension* (`X`) bit is used to indicate the presence of an
+   Padding of an RTP packet.
+
+The *extension* (``X``) bit is used to indicate the presence of an
 extension header, which would be defined for a specific application and
 follow the main header. Such headers are rarely used, since it is
 generally possible to define a payload-specific header as part of the
 payload format definition for a particular application.
 
-The `X` bit is followed by a 4-bit field that counts the number of
+The ``X`` bit is followed by a 4-bit field that counts the number of
 *contributing sources*, if any are included in the header. Contributing
 sources are discussed below.
 
@@ -329,9 +331,9 @@ back samples at the appropriate intervals and to enable different media
 streams to be synchronized. Because different applications may require
 different granularities of timing, RTP itself does not specify the units
 in which time is measured. Instead, the timestamp is just a counter of 
-"ticks," where the time between ticks is dependent on the encoding in
+“ticks,” where the time between ticks is dependent on the encoding in
 use. For example, an audio application that samples data once every
-125 $$\mu$$s could use that value as its clock resolution. The clock
+125 μs could use that value as its clock resolution. The clock
 granularity is one of the details that is specified in the RTP profile
 or payload format for an application.
 
@@ -339,19 +341,19 @@ The timestamp value in the packet is a number representing the time at
 which the *first* sample in the packet was generated. The timestamp is
 not a reflection of the time of day; only the differences between
 timestamps are relevant. For example, if the sampling interval is
-125 $$\mu$$s and the first sample in packet n+1 was generated 10 ms
-after the first sample in packet n, then the number of sampling
-instants between these two samples is
+125 μs and the first sample in packet n+1 was generated 10 ms after
+the first sample in packet n, then the number of sampling instants
+between these two samples is
 
-{% center %} TimeBetweenPackets / TimePerSample {% endcenter %}
+.. centered:: TimeBetweenPackets / TimePerSample
 
-$$
-= (10 \times 10^{-3}) / (125 \times 10^{-6}) = 80
-$$
+.. math::
+
+   = (10 \times 10^{-3}) / (125 \times 10^{-6}) = 80
 
 Assuming the clock granularity is the same as the sampling interval,
-then the timestamp in packet n+1 would be greater than that in packet
-n by 80. Note that fewer than 80 samples might have been sent due to
+then the timestamp in packet n+1 would be greater than that in packet n
+by 80. Note that fewer than 80 samples might have been sent due to
 compression techniques such as silence detection, and yet the timestamp
 allows the receiver to play back the samples with the correct temporal
 relationship.
@@ -375,10 +377,11 @@ requirements for a conference by receiving data from many sources and
 sending it as a single stream. For example, the audio streams from
 several concurrent speakers could be decoded and recoded as a single
 audio stream. In this case, the mixer lists itself as the
-synchronization source but also lists the contributing sources—the
-SSRC values of the speakers who contributed to the packet in question.
+synchronization source but also lists the contributing sources—the SSRC
+values of the speakers who contributed to the packet in question.
 
-## Control Protocol
+Control Protocol
+----------------
 
 RTCP provides a control stream that is associated with a data stream for
 a multimedia application. This control stream provides three main
@@ -387,17 +390,17 @@ functions:
 1. Feedback on the performance of the application and the network
 
 2. A way to correlate and synchronize different media streams that have
-    come from the same sender
+   come from the same sender
 
 3. A way to convey the identity of a sender for display on a user
-    interface (e.g., the `vat` interface shown in [Figure 1](#vat))
+   interface.
 
 The first function may be useful for detecting and responding to
-congestion. Some applications are able to operate at difference rates
-and may use performance data to decide to use a more aggressive
-compression scheme to reduce congestion, for example, or to send a
-higher-quality stream when there is little congestion. Performance
-feedback can also be useful in diagnosing network problems.
+congestion. Some applications are able to operate at different rates and
+may use performance data to decide to use a more aggressive compression
+scheme to reduce congestion, for example, or to send a higher-quality
+stream when there is little congestion. Performance feedback can also be
+useful in diagnosing network problems.
 
 You might think that the second function is already provided by the
 synchronization source ID (SSRC) of RTP, but in fact it is not. As
@@ -420,16 +423,16 @@ clock-rate-dependent timestamps that are carried in RTP data packets.
 
 RTCP defines a number of different packet types, including
 
-- Sender reports, which enable active senders to a session to report
+-  Sender reports, which enable active senders to a session to report
    transmission and reception statistics
 
-- Receiver reports, which receivers who are not senders use to report
-  reception statistics
+-  Receiver reports, which receivers who are not senders use to report
+   reception statistics
 
-- Source descriptions, which carry CNAMEs and other sender description
-  information
+-  Source descriptions, which carry CNAMEs and other sender description
+   information
 
-- Application-specific control packets
+-  Application-specific control packets
 
 These different RTCP packet types are sent over the lower-layer
 protocol, which, as we have noted, is typically UDP. Several RTCP
@@ -473,13 +476,13 @@ the most recent reporting period.
 
 The extra information in a sender report consists of
 
-- A timestamp containing the actual time of day when this report was
+-  A timestamp containing the actual time of day when this report was
    generated
 
-- The RTP timestamp corresponding to the time when the report was
+-  The RTP timestamp corresponding to the time when the report was
    generated
 
-- Cumulative counts of the packets and bytes sent by this sender since
+-  Cumulative counts of the packets and bytes sent by this sender since
    it began transmission
 
 Note that the first two quantities can be used to enable synchronization
@@ -491,26 +494,26 @@ Both sender and receiver reports contain one block of data per source
 that has been heard from since the last report. Each block contains the
 following statistics for the source in question:
 
-- Its SSRC
+-  Its SSRC
 
-- The fraction of data packets from this source that were lost since
+-  The fraction of data packets from this source that were lost since
    the last report was sent (calculated by comparing the number of
-   packets received with the number of packets expected; this last
-   value can be determined from the RTP sequence numbers)
+   packets received with the number of packets expected; this last value
+   can be determined from the RTP sequence numbers)
 
-- Total number of packets lost from this source since the first time
-   it was heard from
+-  Total number of packets lost from this source since the first time it
+   was heard from
 
-- Highest sequence number received from this source (extended to
+-  Highest sequence number received from this source (extended to
    32 bits to account for wrapping of the sequence number)
 
-- Estimated interarrival jitter for the source (calculated by
-   comparing the interarrival spacing of received packets with the
-   expected spacing at transmission time)
+-  Estimated interarrival jitter for the source (calculated by comparing
+   the interarrival spacing of received packets with the expected
+   spacing at transmission time)
 
-- Last actual timestamp received via RTCP for this source
+-  Last actual timestamp received via RTCP for this source
 
-- Delay since last sender report received via RTCP for this source
+-  Delay since last sender report received via RTCP for this source
 
 As you might imagine, the recipients of this information can learn all
 sorts of things about the state of the session. In particular, they can
@@ -524,15 +527,15 @@ resilient to loss.
 
 The final aspect of RTCP that we will consider is the source description
 packet. Such a packet contains, at a minimum, the SSRC of the sender and
-the sender's CNAME. The canonical name is derived in such a way that all
+the sender’s CNAME. The canonical name is derived in such a way that all
 applications that generate media streams that might need to be
 synchronized (e.g., separately generated audio and video streams from
 the same user) will choose the same CNAME even though they might choose
 different SSRC values. This enables a receiver to identify the media
 stream that came from the same sender. The most common format of the
-CNAME is , where `host` is the fully qualified domain name of the
+CNAME is , where ``host`` is the fully qualified domain name of the
 sending machine. Thus, an application launched by the user whose user
-name is `jdoe` running on the machine would use the string as its
+name is ``jdoe`` running on the machine would use the string as its
 CNAME. The large and variable number of bytes used in this
 representation would make it a bad choice for the format of an SSRC,
 since the SSRC is sent with every data packet and must be processed in
@@ -550,5 +553,5 @@ application designers. Because there is an infinite number of possible
 applications, the challenge in designing a transport protocol is to make
 it general enough to meet the widely varying needs of many different
 applications without making the protocol itself impossible to implement.
-RTP has proven very successful in this regard, forming the basis for many
-real-time multimedia applications run over the Internet today.
+RTP has proven very successful in this regard, forming the basis for
+many real-time multimedia applications run over the Internet today.
